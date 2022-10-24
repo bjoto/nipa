@@ -1,5 +1,191 @@
 .. SPDX-License-Identifier: GPL-2.0
 
+============================================================
+NIPA-RV - Netdev^HRISC-V Infrastructure for Patch Automation
+============================================================
+
+** Are you new to NIPA? Please read the NIPA documentation below! **
+
+NIPA-RV is simply NIPA, but for the RISC-V tree. 
+
+Changes from NIPA
+=================
+
+The tree mark handling is removed. The RISC-V tree has different
+workflow/patch management from netdev/bpf, e.g. RISC-V does not tag
+patches "this is a fix", and "this is for the next release". Further,
+the RISC-V does not currently have any pull-requests aimed for it,
+e.g. the RISC-V KVM work is pulled in via the KVM trees.
+
+There are two RISC-V trees, for-next and fixes. NIPA-RV simply assumes
+that if there is a patch with Fixes: in the series, it's aimed for
+fixes.
+
+The tests directory has been left as is for NIPA, and instead a new
+tests_rv directory contains the RISC-V tests.
+
+Install/host requirements
+=========================
+::
+
+ # apt install python3 python3-pip git podman
+ $ pip3 install -U --user tuxmake
+ $ pip3 install -U --user tuxrun
+
+Configuration
+=============
+
+``$NIPA_DIR`` refers to the directory where NIPA was cloned::
+
+ $ git clone https://github.com/bjoto/nipa.git
+ $ cd nipa
+ $ git checkout -b rv origin/rv
+
+Clone the RISC-V trees::
+
+ $ mkdir trees
+ $ git clone https://git.kernel.org/pub/scm/linux/kernel/git/riscv/linux.git
+ $ cd linux
+ $ git worktree add ../fixes -b fixes origin/fixes
+ $ git worktree add ../for-next -b for-next origin/for-next
+
+A corresponding config file for the above would be::
+
+ $ cat $NIPA_DIR/nipa.config
+ [patchwork]
+ server = patchwork.kernel.org
+ project = Linux RISC-V
+ 
+ [dirs]
+ tests = /path/to/nipa/dir/tests_rv
+ trees = /path/to/kernel/trees/trees
+ 
+ [trees]
+ for-next = for-next,for-next,origin,origin/for-next
+ fixes = fixes,fixes,origin,origin/fixes
+
+Tests
+=====
+
+Some tests are RISC-V specific, and some are just copies from NIPA.
+
+Series tests
+------------
+
+Series tests are run once on the entire series. `pw_upload.py`
+multiplicates them to each patch since patchwork does not support
+"series checks"
+
+patch_count
+~~~~~~~~~~~
+
+Check if number of patches in the series is not larger than 15.
+
+cover_letter
+~~~~~~~~~~~~
+
+Check if series has a cover letter (require one only if there
+are more than two patches, otherwise the series is trivial).
+
+fixes_present
+~~~~~~~~~~~~~
+
+Check if any of the patches in the series contains a Fixes
+tag.
+
+If the tree name does not contain "next" in it assume that
+the patches are targeting current release cycle, therefore
+they are fixes.
+
+Patch tests
+-----------
+
+verify_signedoff
+~~~~~~~~~~~~~~~~
+
+Check that the Signed-off-by tag matches the From field.
+This test was taken from GregKH's repo, but there's a number
+of versions of this check circulating.
+
+The check may be a little looser than some may expect, because
+it's satisfied if authors name **or** email address match between
+From and Signed-off-by, not necessarily both of them.
+
+The original test validates the committer had signed-off
+the commit as well as the author, which is obviously meaningless
+when the test infra applies the patches to the tree by itself.
+
+verify_fixes
+~~~~~~~~~~~~
+
+Check that the Fixes tag is correct.
+This test was taken from GregKH's repo, but there's a number
+of versions of this check circulating.
+
+The hash is expected to be present in the tree to which patch
+is being applied. This is a slight departure from GregKH's
+original where the hash is checked against Linus's tree.
+
+source_inline
+~~~~~~~~~~~~~
+
+Check if there are any *inline* keywords in the C source files.
+
+header_inline
+~~~~~~~~~~~~~
+
+Try to catch static functions without the inline keyword in headers.
+
+checkpatch
+~~~~~~~~~~
+
+Run selected tests of kernel's *scripts/checkpatch.pl* on the
+patches.
+
+cc_maintainers
+~~~~~~~~~~~~~~
+
+Check if addresses pointed out by `get_maintainers.pl` are included
+in the To/Cc of the mails.
+
+Warn if not all included, error if nobody is included or author of
+a change blamed by a Fixes tag is not.
+
+kdoc
+~~~~
+
+Run `kernel-doc` and check for warnings/errors. Similarly to build
+tests only compare the number of errors for now.
+
+module_param
+~~~~~~~~~~~~
+
+Warn if patch is adding module parameters.
+
+build_boot_rv64
+~~~~~~~~~~~~~~~
+
+Build allmodconfig with GCC 11, and simple boot/poweroff testing.
+
+
+build_boot_rv64_clang
+~~~~~~~~~~~~~~~~~~~~~
+
+Build allmodconfig with clang-nightly, and simple boot/poweroff testing.
+
+
+build_warn_rv64
+~~~~~~~~~~~~~~~
+
+Same as NIPA build_allmodconfig_warn, but for RISC-V 64-bit.
+
+
+TODO
+====
+
+Add rv32 tests
+
+   
 =================================================
 NIPA - Netdev Infrastructure for Patch Automation
 =================================================

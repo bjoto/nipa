@@ -21,7 +21,7 @@ from core import Tree
 from pw import Patchwork
 from pw import PwSeries
 import core
-import netdev
+import re
 
 
 class IncompleteSeries(Exception):
@@ -92,50 +92,35 @@ class PwPoller:
             pass
 
     def _series_determine_tree(self, s: PwSeries) -> str:
-        s.tree_name = netdev.series_tree_name_direct(s)
-        s.tree_mark_expected = True
-        s.tree_marked = bool(s.tree_name)
+        # The RISC-V tree does not require series to have tree marks
+        s.tree_mark_expected = None
+        s.tree_marked = False
 
         if s.is_pure_pull():
-            if s.title.find('-next') >= 0:
-                s.tree_name = 'net-next'
+            if s.title.find('-fixes') >= 0:
+                s.tree_name = 'fixes'
             else:
-                s.tree_name = 'net'
-            s.tree_mark_expected = None
+                s.tree_name = 'for-next'
             return f"Pull request for {s.tree_name}"
 
-        if s.tree_name:
-            log(f'Series is clearly designated for: {s.tree_name}', "")
-            return f"Clearly marked for {s.tree_name}"
-
-        s.tree_mark_expected, should_test = netdev.series_tree_name_should_be_local(s)
-        if not should_test:
-            log("No tree designation found or guessed", "")
-            return "Not a local patch"
-
-        if netdev.series_ignore_missing_tree_name(s):
-            s.tree_mark_expected = None
-            log('Okay to ignore lack of tree in subject, ignoring series', "")
-            return "Series ignored based on subject"
-
-        if s.tree_mark_expected:
-            log_open_sec('Series should have had a tree designation')
+        # If there's a Fixes: tag, assume the fixes tree
+        commits = []
+        regex = re.compile(r'^Fixes: [a-f0-9]* \(')
+        for p in s.patches:
+            commits += regex.findall(p.raw_patch)
+        if commits:
+            s.tree_name = 'fixes'
         else:
-            log_open_sec('Series okay without a tree designation')
+            s.tree_name = 'for-next'
 
-        # TODO: make this configurable
-        if "net" in self._trees and netdev.series_is_a_fix_for(s, self._trees["net"]):
-            s.tree_name = "net"
-        elif "net-next" in self._trees and self._trees["net-next"].check_applies(s):
-            s.tree_name = "net-next"
+        # XXX fallback to something else?
 
         if s.tree_name:
             log(f"Target tree - {s.tree_name}", "")
             res = f"Guessed tree name to be {s.tree_name}"
         else:
             log("Target tree not found", "")
-            res = "Guessing tree name failed - patch did not apply"
-        log_end_sec()
+            res = "Guessing tree name failed"
 
         return res
 
@@ -167,9 +152,6 @@ class PwPoller:
             raise IncompleteSeries
 
         comment = self.series_determine_tree(s)
-        s.need_async = netdev.series_needs_async(s)
-        if s.need_async:
-            comment += ', async'
 
         if hasattr(s, 'tree_name') and s.tree_name:
             s.tree_selection_comment = comment
