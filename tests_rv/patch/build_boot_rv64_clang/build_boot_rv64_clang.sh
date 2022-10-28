@@ -12,7 +12,7 @@ tuxmake --wrapper ccache --target-arch riscv -e PATH=$PATH --directory . \
 if [ $rc -ne 0 ]; then
   echo "Build failed" >&$DESC_FD
 else
-  tuxrun --device qemu-riscv64 --tuxmake $tmpdir -e PATH=$PATH || rc=1
+  tuxrun --device qemu-riscv64 --tuxmake $tmpdir || rc=1
   if [ $rc -ne 0 ]; then
     echo "Boot/poweroff failed" >&$DESC_FD
   fi
