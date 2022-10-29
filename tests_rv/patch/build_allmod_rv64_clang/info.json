@@ -1,0 +1,5 @@
+{
+  "run": ["build_allmod_rv64_clang.sh"],
+  "pull-requests": true,
+  "disabled": true
+}
