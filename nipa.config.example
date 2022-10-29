@@ -1,6 +1,5 @@
-[patchwork]
-server = patchwork.kernel.org
-project = Linux RISC-V
+[results]
+server = https://patchwork.kernel.org
 
 [poller]
 recheck_period = 0
@@ -13,3 +12,7 @@ trees = trees_rv
 [trees]
 for-next = for-next,for-next,origin,origin/for-next
 fixes = fixes,fixes,origin,origin/fixes
+
+[patchwork]
+server = patchwork.kernel.org
+project = Linux RISC-V
