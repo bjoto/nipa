@@ -3,7 +3,7 @@
 #
 # Copyright (c) 2022 by Rivos Inc.
 
-tmpdir=$(mktemp -d)
+tmpdir=build
 rc=0
 
 tuxmake --wrapper ccache --target-arch riscv --directory . \
