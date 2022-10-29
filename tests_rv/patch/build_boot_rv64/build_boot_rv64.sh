@@ -7,7 +7,9 @@ tmpdir=$(mktemp -d)
 rc=0
 
 tuxmake --wrapper ccache --target-arch riscv -e PATH=$PATH --directory . \
-	-o $tmpdir --toolchain gcc-11 --kconfig allmodconfig || rc=1
+	--environment=KBUILD_BUILD_TIMESTAMP=@1621270510 \
+	--environment=KBUILD_BUILD_USER=tuxmake --environment=KBUILD_BUILD_HOST=tuxmake \
+	-o $tmpdir --toolchain gcc --kconfig allmodconfig || rc=1
 
 if [ $rc -ne 0 ]; then
   echo "Build failed" >&$DESC_FD

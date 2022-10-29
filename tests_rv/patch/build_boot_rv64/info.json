@@ -1,4 +1,5 @@
 {
   "run": ["build_boot_rv64.sh"],
-  "pull-requests": true
+  "pull-requests": true,
+  "disabled": true
 }
