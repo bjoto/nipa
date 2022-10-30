@@ -16,6 +16,7 @@ emailpat = re.compile(r'([^ <"]*@[^ >"]*)')
 ignore_emails = {
     'linux-kernel@vger.kernel.org',  # Don't expect people to CC LKML on everything
     'nipa@patchwork.hopto.org',      # For new files NIPA will get marked as committer
+    'foo.bar@bar.com',               # same as above
     'jeffrey.t.kirsher@intel.com'
 }
 
