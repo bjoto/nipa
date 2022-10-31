@@ -31,9 +31,9 @@ git checkout -q HEAD~
 echo "Building the tree before the patch"
 
 tuxmake --wrapper ccache --target-arch riscv -e PATH=$PATH --directory . \
-	-o $tmpdir0 --toolchain gcc --kconfig defconfig -K CONFIG_WERROR=n W=1 \
-  --environment=KBUILD_BUILD_TIMESTAMP=@1621270510 \
+	--environment=KBUILD_BUILD_TIMESTAMP=@1621270510 \
 	--environment=KBUILD_BUILD_USER=tuxmake --environment=KBUILD_BUILD_HOST=tuxmake \
+	-o $tmpdir0 --toolchain gcc --kconfig defconfig -K CONFIG_WERROR=n W=1 \
 	2> >(tee $tmpfile_o >&2)
 incumbent=$(grep -i -c "\(warn\|error\)" $tmpfile_o)
 
