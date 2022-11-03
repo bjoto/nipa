@@ -23,20 +23,22 @@ git log -1 --pretty='%h ("%s")' HEAD~
 
 echo "Baseline building the tree"
 
+# FIXME: Build allmodconfig. For some reason ccache is not working for allmodconfig
+
 tuxmake --wrapper ccache --target-arch riscv --runtime podman --directory . \
-	--environment=KBUILD_BUILD_TIMESTAMP=@1621270510 \
-	--environment=KBUILD_BUILD_USER=tuxmake --environment=KBUILD_BUILD_HOST=tuxmake \
-	-o $tmpdir0 --toolchain gcc-11 --kconfig allmodconfig -K CONFIG_WERROR=n W=1
+        --environment=KBUILD_BUILD_TIMESTAMP=@1621270510 \
+        --environment=KBUILD_BUILD_USER=tuxmake --environment=KBUILD_BUILD_HOST=tuxmake \
+        -o $tmpdir0 --toolchain gcc-11 -z none --kconfig defconfig -K CONFIG_WERROR=n W=1
 
 git checkout -q HEAD~
 
 echo "Building the tree before the patch"
 
 tuxmake --wrapper ccache --target-arch riscv --runtime podman --directory . \
-	--environment=KBUILD_BUILD_TIMESTAMP=@1621270510 \
-	--environment=KBUILD_BUILD_USER=tuxmake --environment=KBUILD_BUILD_HOST=tuxmake \
-	-o $tmpdir1 --toolchain gcc-11 --kconfig allmodconfig -K CONFIG_WERROR=n W=1 \
-	2> >(tee $tmpfile_o >&2)
+        --environment=KBUILD_BUILD_TIMESTAMP=@1621270510 \
+        --environment=KBUILD_BUILD_USER=tuxmake --environment=KBUILD_BUILD_HOST=tuxmake \
+        -o $tmpdir1 --toolchain gcc-11 -z none --kconfig defconfig -K CONFIG_WERROR=n W=1 \
+        > >(tee $tmpfile_o)
 incumbent=$(grep -i -c "\(warn\|error\)" $tmpfile_o)
 
 echo "Building the tree with the patch"
@@ -44,10 +46,10 @@ echo "Building the tree with the patch"
 git checkout -q $HEAD
 
 tuxmake --wrapper ccache --target-arch riscv --runtime podman --directory . \
-	--environment=KBUILD_BUILD_TIMESTAMP=@1621270510 \
-	--environment=KBUILD_BUILD_USER=tuxmake --environment=KBUILD_BUILD_HOST=tuxmake \
-	-o $tmpdir2 --toolchain gcc-11 --kconfig allmodconfig -K CONFIG_WERROR=n W=1 \
-	2> >(tee $tmpfile_n >&2) || rc=1
+        --environment=KBUILD_BUILD_TIMESTAMP=@1621270510 \
+        --environment=KBUILD_BUILD_USER=tuxmake --environment=KBUILD_BUILD_HOST=tuxmake \
+        -o $tmpdir2 --toolchain gcc-11 -z none --kconfig defconfig -K CONFIG_WERROR=n W=1 \
+        > >(tee $tmpfile_n) || rc=1
 
 current=$(grep -i -c "\(warn\|error\)" $tmpfile_n)
 
