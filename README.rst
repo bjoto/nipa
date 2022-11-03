@@ -46,7 +46,9 @@ Clone the RISC-V trees::
  $ mkdir trees
  $ git clone https://git.kernel.org/pub/scm/linux/kernel/git/riscv/linux.git
  $ cd linux
- $ git worktree add ../fixes -b fixes origin/fixes
+ $ git remote add next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+ $ git fetch next
+ $ git worktree add ../fixes -b fixes next/pending-fixes
  $ git worktree add ../for-next -b for-next origin/for-next
 
 A corresponding config file for the above would be::
@@ -62,7 +64,7 @@ A corresponding config file for the above would be::
  
  [trees]
  for-next = for-next,for-next,origin,origin/for-next
- fixes = fixes,fixes,origin,origin/fixes
+ fixes = fixes,fixes,next,next/pending-fixes
 
 Tests
 =====
