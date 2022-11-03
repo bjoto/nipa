@@ -21,7 +21,7 @@ from core import Tree
 from pw import Patchwork
 from pw import PwSeries
 import core
-import re
+import netdev
 
 
 class IncompleteSeries(Exception):
@@ -103,17 +103,10 @@ class PwPoller:
                 s.tree_name = 'for-next'
             return f"Pull request for {s.tree_name}"
 
-        # If there's a Fixes: tag, assume the fixes tree
-        commits = []
-        regex = re.compile(r'^Fixes: [a-f0-9]* \(')
-        for p in s.patches:
-            commits += regex.findall(p.raw_patch)
-        if commits:
-            s.tree_name = 'fixes'
-        else:
-            s.tree_name = 'for-next'
-
-        # XXX fallback to something else?
+        if "fixes" in self._trees and netdev.series_is_a_fix_for(s, self._trees["fixes"]):
+            s.tree_name = "fixes"
+        elif "for-next" in self._trees and self._trees["for-next"].check_applies(s):
+            s.tree_name = "for-next"
 
         if s.tree_name:
             log(f"Target tree - {s.tree_name}", "")
