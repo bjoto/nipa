@@ -1,0 +1,4 @@
+{
+  "run": ["build_rv64_nommu_virt_defconfig.sh"],
+  "pull-requests": true
+}
