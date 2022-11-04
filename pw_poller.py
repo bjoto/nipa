@@ -108,7 +108,7 @@ class PwPoller:
         elif "for-next" in self._trees and self._trees["for-next"].check_applies(s):
             s.tree_name = "for-next"
 
-        if s.tree_name:
+        if hasattr(s, 'tree_name') and s.tree_name:
             log(f"Target tree - {s.tree_name}", "")
             res = f"Guessed tree name to be {s.tree_name}"
         else:

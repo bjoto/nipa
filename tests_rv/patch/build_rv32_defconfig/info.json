@@ -1,0 +1,4 @@
+{
+  "run": ["build_rv32_defconfig.sh"],
+  "pull-requests": true
+}

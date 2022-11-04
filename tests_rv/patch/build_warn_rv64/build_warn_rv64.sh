@@ -24,9 +24,8 @@ echo "Baseline building the tree"
 tuxmake --wrapper ccache --target-arch riscv -e PATH=$PATH --directory . \
 	--environment=KBUILD_BUILD_TIMESTAMP=@1621270510 \
 	--environment=KBUILD_BUILD_USER=tuxmake --environment=KBUILD_BUILD_HOST=tuxmake \
-	-o $tmpdir0 --toolchain gcc -z none --kconfig defconfig -K CONFIG_WERROR=n W=1
-# FIXME: Build allmodconfig. For some reason ccache is not working for allmodconfig
-
+	-o $tmpdir0 --toolchain gcc -z none --kconfig allmodconfig -K CONFIG_WERROR=n \
+	-K CONFIG_GCC_PLUGINS=n W=1
 
 git checkout -q HEAD~
 
@@ -35,8 +34,10 @@ echo "Building the tree before the patch"
 tuxmake --wrapper ccache --target-arch riscv -e PATH=$PATH --directory . \
 	--environment=KBUILD_BUILD_TIMESTAMP=@1621270510 \
 	--environment=KBUILD_BUILD_USER=tuxmake --environment=KBUILD_BUILD_HOST=tuxmake \
-	-o $tmpdir0 --toolchain gcc -z none --kconfig defconfig -K CONFIG_WERROR=n W=1 \
+	-o $tmpdir0 --toolchain gcc -z none --kconfig allmodconfig -K CONFIG_WERROR=n \
+	-K CONFIG_GCC_PLUGINS=n W=1 \
 	2> >(tee $tmpfile_o >&2)
+
 incumbent=$(grep -i -c "\(warn\|error\)" $tmpfile_o)
 
 echo "Building the tree with the patch"
@@ -46,7 +47,8 @@ git checkout -q $HEAD
 tuxmake --wrapper ccache --target-arch riscv -e PATH=$PATH --directory . \
 	--environment=KBUILD_BUILD_TIMESTAMP=@1621270510 \
 	--environment=KBUILD_BUILD_USER=tuxmake --environment=KBUILD_BUILD_HOST=tuxmake \
-	-o $tmpdir0 --toolchain gcc -z none --kconfig defconfig -K CONFIG_WERROR=n W=1 \
+	-o $tmpdir0 --toolchain gcc -z none --kconfig allmodconfig -K CONFIG_WERROR=n \
+	-K CONFIG_GCC_PLUGINS=n W=1 \
 	2> >(tee $tmpfile_n >&2) || rc=1
 
 current=$(grep -i -c "\(warn\|error\)" $tmpfile_n)
