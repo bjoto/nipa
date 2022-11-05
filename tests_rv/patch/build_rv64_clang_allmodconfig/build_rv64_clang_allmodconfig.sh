@@ -6,7 +6,7 @@
 tmpdir=$(mktemp -d)
 rc=0
 
-tuxmake --wrapper ccache --target-arch riscv --runtime podman --directory . \
+tuxmake --wrapper ccache --target-arch riscv --directory . \
         --environment=KBUILD_BUILD_TIMESTAMP=@1621270510 \
         --environment=KBUILD_BUILD_USER=tuxmake --environment=KBUILD_BUILD_HOST=tuxmake \
         -o $tmpdir --toolchain llvm -z none --kconfig allmodconfig \
