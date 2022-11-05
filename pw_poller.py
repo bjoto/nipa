@@ -150,7 +150,7 @@ class PwPoller:
             s.tree_selection_comment = comment
             self._workers[s.tree_name].queue.put(s)
         else:
-            core.write_tree_selection_result(self.result_dir, s, comment)
+            core.write_tree_selection_result(self.result_dir, s, comment, False)
             core.mark_done(self.result_dir, s)
 
         self.seen_series.add(s['id'])

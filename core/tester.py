@@ -13,7 +13,7 @@ import core
 from core import Test, PullError
 
 
-def write_tree_selection_result(result_dir, s, comment):
+def write_tree_selection_result(result_dir, s, comment, success=True):
     series_dir = os.path.join(result_dir, str(s.id))
 
     tree_test_dir = os.path.join(series_dir, "tree_selection")
@@ -21,7 +21,10 @@ def write_tree_selection_result(result_dir, s, comment):
         os.makedirs(tree_test_dir)
 
     with open(os.path.join(tree_test_dir, "retcode"), "w+") as fp:
-        fp.write("0")
+        if success:
+            fp.write("0")
+        else:
+            fp.write("1")
     with open(os.path.join(tree_test_dir, "desc"), "w+") as fp:
         fp.write(comment)
 
