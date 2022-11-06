@@ -7,6 +7,7 @@
 import configparser
 import os
 import signal
+import subprocess
 import inotify_simple as inotify
 
 from core import NIPA_DIR
@@ -68,6 +69,17 @@ def _pw_upload_results(series_dir, pw, config):
                 continue
 
             tr = PwTestResult(test, series_dir, f"{result_server}/{series}/{test}")
+
+            if tr.state != PatchworkCheckState.SUCCESS:
+                try:
+                    cmd = [f"gh gist create -p -f $(find {series_dir}/{test} -type f)"]
+                    output = subprocess.run(cmd, shell=True, capture_output=True, check=True,
+                                            text=True)
+                    tr.url = output.stdout.strip()
+                    log(f"gist created for {series_dir}/{test} @ {tr.url}")
+                except subprocess.CalledProcessError:
+                    log(f"gist creation failed for {series_dir}/{test}")
+
             series_results.append(tr)
 
         break
@@ -86,6 +98,17 @@ def _pw_upload_results(series_dir, pw, config):
             for _, test_dirs, _ in os.walk(patch_dir):
                 for test in test_dirs:
                     tr = PwTestResult(test, patch_dir, f"{result_server}/{series}/{patch}/{test}")
+
+                    if tr.state != PatchworkCheckState.SUCCESS:
+                        try:
+                            cmd = [f"gh gist create -p -f $(find {series_dir}/{patch}/{test} -type f)"]
+                            output = subprocess.run(cmd, shell=True, capture_output=True,
+                                                    check=True, text=True)
+                            tr.url = output.stdout.strip()
+                            log(f"gist created for {series_dir}/{patch}/{test} @ {tr.url}")
+                        except subprocess.CalledProcessError:
+                            log(f"gist creation failed for {series_dir}/{patch}/{test}")
+
                     pw.post_check(patch=patch, name=tr.test, state=tr.state, url=tr.url,
                                   desc=tr.desc)
 
