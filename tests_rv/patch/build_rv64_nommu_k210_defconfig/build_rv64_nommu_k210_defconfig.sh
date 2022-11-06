@@ -14,8 +14,7 @@ tuxmake --wrapper ccache --target-arch riscv --directory . \
 if [ $rc -ne 0 ]; then
   echo "Build failed" >&$DESC_FD
 else
-  echo "Build and OK" >&$DESC_FD
-  fi
+  echo "Build OK" >&$DESC_FD
 fi
 
 rm -rf $tmpdir
