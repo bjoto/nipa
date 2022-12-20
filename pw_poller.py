@@ -113,7 +113,7 @@ class PwPoller:
             res = f"Guessed tree name to be {s.tree_name}"
         else:
             log("Target tree not found", "")
-            res = "Guessing tree name failed"
+            res = "Failed to apply to next/pending-fixes or riscv/for-next"
 
         return res
 
