@@ -5,7 +5,6 @@
 
 # Modified tests/patch/build_defconfig_warn.sh for RISC-V builds
 
-tmpfile_b=$(mktemp)
 tmpfile_o=$(mktemp)
 tmpfile_n=$(mktemp)
 
@@ -13,28 +12,31 @@ tmpdir0=build
 
 rc=0
 
-echo "Redirect to $tmpfile_b $tmpfile_o and $tmpfile_n"
+echo "Redirect to $tmpfile_o and $tmpfile_n"
 
 HEAD=$(git rev-parse HEAD)
 
 echo "Tree base:"
 git log -1 --pretty='%h ("%s")' HEAD~
 
-echo "Baseline building the tree"
+echo "Building the tree with the patch"
 
 tuxmake --wrapper ccache --target-arch riscv -e PATH=$PATH --directory . \
-	--environment=KBUILD_BUILD_TIMESTAMP=@1621270510 --fail-fast \
+	--environment=KBUILD_BUILD_TIMESTAMP=@1621270510 \
 	--environment=KBUILD_BUILD_USER=tuxmake --environment=KBUILD_BUILD_HOST=tuxmake \
 	-o $tmpdir0 --toolchain gcc -z none --kconfig allmodconfig -K CONFIG_WERROR=n \
-	-K CONFIG_GCC_PLUGINS=n \
-	> $tmpfile_b || rc=1
+	-K CONFIG_GCC_PLUGINS=n W=1 \
+	> $tmpfile_n || rc=1
 
 if [ $rc -eq 1 ]
 then
 	echo "Failed to build the tree with this patch." >&$DESC_FD
-	grep "\(warning\|error\):" $tmpfile_b >&2
+	grep "\(warning\|error\):" $tmpfile_n >&2
+	rm -rf $tmpdir0 $tmpfile_o $tmpfile_n
 	exit $rc
 fi
+
+current=$(grep -c "\(warning\|error\):" $tmpfile_n)
 
 git checkout -q HEAD~
 
@@ -49,18 +51,7 @@ tuxmake --wrapper ccache --target-arch riscv -e PATH=$PATH --directory . \
 
 incumbent=$(grep -c "\(warning\|error\):" $tmpfile_o)
 
-echo "Building the tree with the patch"
-
 git checkout -q $HEAD
-
-tuxmake --wrapper ccache --target-arch riscv -e PATH=$PATH --directory . \
-	--environment=KBUILD_BUILD_TIMESTAMP=@1621270510 \
-	--environment=KBUILD_BUILD_USER=tuxmake --environment=KBUILD_BUILD_HOST=tuxmake \
-	-o $tmpdir0 --toolchain gcc -z none --kconfig allmodconfig -K CONFIG_WERROR=n \
-	-K CONFIG_GCC_PLUGINS=n W=1 \
-	> $tmpfile_n || rc=1
-
-current=$(grep -c "\(warning\|error\):" $tmpfile_n)
 
 echo "Errors and warnings before: $incumbent this patch: $current" >&$DESC_FD
 
@@ -83,6 +74,6 @@ if [ $current -gt $incumbent ]; then
   rc=1
 fi
 
-rm -rf $tmpdir0 $tmpfile_o $tmpfile_n $tmpfile_b
+rm -rf $tmpdir0 $tmpfile_o $tmpfile_n
 
 exit $rc
