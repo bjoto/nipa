@@ -25,7 +25,7 @@ tuxmake --wrapper ccache --target-arch riscv -e PATH=$PATH --directory . \
 	--environment=KBUILD_BUILD_TIMESTAMP=@1621270510 \
 	--environment=KBUILD_BUILD_USER=tuxmake --environment=KBUILD_BUILD_HOST=tuxmake \
 	-o $tmpdir0 --toolchain gcc -z none --kconfig allmodconfig -K CONFIG_WERROR=n \
-	-K CONFIG_GCC_PLUGINS=n W=1 \
+	-K CONFIG_GCC_PLUGINS=n W=1 CROSS_COMPILE=riscv64-linux- \
 	> $tmpfile_n || rc=1
 
 if [ $rc -eq 1 ]
@@ -46,7 +46,7 @@ tuxmake --wrapper ccache --target-arch riscv -e PATH=$PATH --directory . \
 	--environment=KBUILD_BUILD_TIMESTAMP=@1621270510 \
 	--environment=KBUILD_BUILD_USER=tuxmake --environment=KBUILD_BUILD_HOST=tuxmake \
 	-o $tmpdir0 --toolchain gcc -z none --kconfig allmodconfig -K CONFIG_WERROR=n \
-	-K CONFIG_GCC_PLUGINS=n W=1 \
+	-K CONFIG_GCC_PLUGINS=n W=1 CROSS_COMPILE=riscv64-linux- \
 	> $tmpfile_o
 
 incumbent=$(grep -c "\(warning\|error\):" $tmpfile_o)

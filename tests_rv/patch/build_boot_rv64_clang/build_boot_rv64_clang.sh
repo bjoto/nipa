@@ -9,7 +9,7 @@ rc=0
 tuxmake --wrapper ccache --target-arch riscv -e PATH=$PATH --directory . \
 	--environment=KBUILD_BUILD_TIMESTAMP=@1621270510 \
 	--environment=KBUILD_BUILD_USER=tuxmake --environment=KBUILD_BUILD_HOST=tuxmake \
-	-o $tmpdir --toolchain llvm || rc=1
+	-o $tmpdir --toolchain llvm CROSS_COMPILE=riscv64-linux- || rc=1
 
 # FIXME: Add -z none to tuxmake (reduce build time), but tuxrun bailes out. :-( 
 
