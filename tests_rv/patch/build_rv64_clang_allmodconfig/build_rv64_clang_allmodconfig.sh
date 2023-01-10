@@ -8,7 +8,8 @@
 tmpfile_o=$(mktemp)
 tmpfile_n=$(mktemp)
 
-tmpdir0=build
+tmpdir_b=build_llvm
+tmpdir_o=output
 
 rc=0
 
@@ -24,7 +25,7 @@ echo "Building the tree with the patch"
 tuxmake --wrapper ccache --target-arch riscv -e PATH=$PATH --directory . \
 	--environment=KBUILD_BUILD_TIMESTAMP=@1621270510 \
 	--environment=KBUILD_BUILD_USER=tuxmake --environment=KBUILD_BUILD_HOST=tuxmake \
-	-o $tmpdir0 --toolchain llvm -z none --kconfig allmodconfig \
+	-o $tmpdir0 -b $tmpdir_b --toolchain llvm -z none --kconfig allmodconfig \
 	-K CONFIG_WERROR=n -K CONFIG_RANDSTRUCT_NONE=y \
 	W=1 CROSS_COMPILE=riscv64-linux- config default \
 	> $tmpfile_n || rc=1
@@ -46,7 +47,7 @@ echo "Building the tree before the patch"
 tuxmake --wrapper ccache --target-arch riscv -e PATH=$PATH --directory . \
 	--environment=KBUILD_BUILD_TIMESTAMP=@1621270510 \
 	--environment=KBUILD_BUILD_USER=tuxmake --environment=KBUILD_BUILD_HOST=tuxmake \
-	-o $tmpdir0 --toolchain llvm -z none --kconfig allmodconfig \
+	-o $tmpdir0 -b $tmpdir_b --toolchain llvm -z none --kconfig allmodconfig \
 	-K CONFIG_WERROR=n -K CONFIG_RANDSTRUCT_NONE=y \
 	W=1 CROSS_COMPILE=riscv64-linux- config default \
 	> $tmpfile_o
@@ -76,6 +77,6 @@ if [ $current -gt $incumbent ]; then
   rc=1
 fi
 
-rm -rf $tmpdir0 $tmpfile_o $tmpfile_n
+rm -rf $tmpdir_o $tmpfile_o $tmpfile_n $tmpdir_b
 
 exit $rc
