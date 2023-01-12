@@ -59,8 +59,16 @@ git checkout -q $HEAD
 echo "Errors and warnings before: $incumbent this patch: $current" >&$DESC_FD
 
 if [ $current -gt $incumbent ]; then
-  echo "New errors added" 1>&2
-  diff -U 0 $tmpfile_o $tmpfile_n 1>&2
+  echo "New errors added:" 1>&2
+
+  tmpfile_errors_before=$(mktemp)
+  tmpfile_errors_now=$(mktemp)
+  grep "\(warning\|error\):" $tmpfile_o | sort | uniq -c > $tmpfile_errors_before
+  grep "\(warning\|error\):" $tmpfile_n | sort | uniq -c > $tmpfile_errors_now
+
+  diff -U 0 $tmpfile_errors_before $tmpfile_errors_now 1>&2
+
+  rm $tmpfile_errors_before $tmpfile_errors_now
 
   echo "Per-file breakdown" 1>&2
   tmpfile_fo=$(mktemp)
