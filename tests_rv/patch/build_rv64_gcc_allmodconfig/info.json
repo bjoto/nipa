@@ -1,0 +1,4 @@
+{
+  "run": ["build_rv64_gcc_allmodconfig.sh"],
+  "pull-requests": true
+}

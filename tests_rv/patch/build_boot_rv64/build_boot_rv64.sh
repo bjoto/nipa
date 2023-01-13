@@ -9,7 +9,7 @@ rc=0
 tuxmake --wrapper ccache --target-arch riscv -e PATH=$PATH --directory . \
 	--environment=KBUILD_BUILD_TIMESTAMP=@1621270510 \
 	--environment=KBUILD_BUILD_USER=tuxmake --environment=KBUILD_BUILD_HOST=tuxmake \
-	-o $tmpdir --toolchain gcc || rc=1
+	-o $tmpdir --toolchain gcc CROSS_COMPILE=riscv64-linux- || rc=1
 
 if [ $rc -ne 0 ]; then
   echo "Build failed" >&$DESC_FD
